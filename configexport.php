@@ -27,7 +27,13 @@ function configexport_civicrm_xmlMenu(&$files) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
-function configexport_civicrm_install() {
+function configexport_civicrm_install()
+{
+  CRM_Core_DAO::executeQuery("
+    ALTER TABLE civicrm_managed
+     ADD COLUMN uuid varchar(64);
+    ");
+
   _configexport_civix_civicrm_install();
 }
 
