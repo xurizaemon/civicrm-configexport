@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <extension key="nz.co.fuzion.configexport" type="module">
   <file>configexport</file>
-  <name>FIXME</name>
-  <description>FIXME</description>
+  <name>Config Export</name>
+  <description>Configuration Export for CiviCRM</description>
   <license>MIT</license>
   <maintainer>
     <author>Chris Burgess</author>

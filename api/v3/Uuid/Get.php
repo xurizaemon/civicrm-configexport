@@ -1,4 +1,8 @@
 <?php
+require 'vendor/autoload.php';
+
+use Rhumsaa\Uuid\Uuid;
+use Rhumsaa\Uuid\Exception\UnsatisfiedDependencyException;
 
 /**
  * Uuid.Get API specification (optional)
@@ -23,23 +27,44 @@ function _civicrm_api3_uuid_Get_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_uuid_Get($params) {
-  $sql = "SELECT uuid FROM civicrm_managed WHERE entity_type = %1 AND entity_id = %2";
-
-  $qParams = array(
-    1 => array($params['entity_type'], 'String'),
-    2 => array($params['entity_id'], 'Integer'),
-  );
-
   $uuid = array();
-  $dao = CRM_Core_DAO::executeQuery($sql, $qParams);
-  if ($dao->fetch()) {
-    $uuid[$dao->id] = array(
-      'uuid' => $dao->uuid,
-      'entity_type' => $dao->entity_type,
-      'entity_id' => $dao->entity_id,
+
+  if (!$dao = _civicrm_api3_uuid_find_by_entityref($params)) {
+    $entry = array(
+      'module' => 'civicrm_configexport',
+      'entity_type' => $params['entity_type'],
+      'entity_id' => $params['entity_id'],
+      'name' => 'ConfigExport::' . $params['entity_type'] . '::' . $params['entity_id'],
+      'uuid' => Uuid::uuid4()->toString(),
     );
-    return civicrm_api3_create_success($uuid, $params, 'Uuid', 'get', $dao);
-  } else {
-    throw new API_Exception(/*errorMessage*/ '', /*errorCode*/ 1234);
+    $insert = CRM_Utils_SQL_Insert::into('civicrm_managed')
+      ->row($entry)
+      ->toSQL();
+    $dao = CRM_Core_DAO::executeQuery($insert);
+    print $dao->id;
+    print_r($params);
+    if (!$dao = _civicrm_api3_uuid_find_by_entityref($params)) {
+      throw new API_Exception('Blah blah', 1234);
+    }
+  }
+  $uuid[$dao->id] = array(
+    'uuid' => $dao->uuid,
+    'entity_type' => $dao->entity_type,
+    'entity_id' => $dao->entity_id,
+  );
+  return civicrm_api3_create_success($uuid, $params, 'Uuid', 'get', $dao);
+}
+
+function _civicrm_api3_uuid_find_by_entityref($params) {
+  $query = CRM_Utils_SQL_Select::from('civicrm_managed m')
+      ->select(array('m.id', 'm.uuid', 'm.entity_type', 'm.entity_id'))
+      ->where('m.entity_id = @entity_id', array('@entity_id' => $params['entity_id']))
+      ->where('m.entity_type = @entity_type', array('@entity_type' => $params['entity_type']))
+      ->where('m.module = @module', array('@module' => 'civicrm_configexport'))
+      ->toSQL();
+  print $query;
+  $dao = CRM_Core_DAO::executeQuery($query);
+  if ($dao->fetch()) {
+    return $dao;
   }
 }

@@ -1,6 +1,8 @@
 # Configuration Export for CiviCRM
 
-## Options
+
+
+## What exists already?
 
 There are multiple existing paths we could take with this:
 
@@ -33,3 +35,5 @@ CiviCRM Entity I think takes a more dynamic approach to exposing CiviCRM objects
 CiviCRM allows for custom extensions to manage certain entities. This handles export but doesn't deal with the logic of associating related entities (eg that a new event rego page uses the just-created new payment processor). It MAY be that the XML importer handles this a bit better?
 
 ### hook_civicrm_managed
+
+CiviCRM has the `civicrm_managed` table which stores data about entities managed by extensions. This can be used to trigger update of managed entities into a CiviCRM instance.
