@@ -9,7 +9,8 @@
  * @see http://wiki.civicrm.org/confluence/display/CRM/API+Architecture+Standards
  */
 function _civicrm_api3_uuid_Get_spec(&$spec) {
-  $spec['magicword']['api.required'] = 1;
+  $spec['entity_type']['api.required'] = 1;
+  $spec['entity_id']['api.required'] = 1;
 }
 
 /**
@@ -22,19 +23,23 @@ function _civicrm_api3_uuid_Get_spec(&$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_uuid_Get($params) {
-  if (array_key_exists('magicword', $params) && $params['magicword'] == 'sesame') {
-    $returnValues = array( // OK, return several data rows
-      12 => array('id' => 12, 'name' => 'Twelve'),
-      34 => array('id' => 34, 'name' => 'Thirty four'),
-      56 => array('id' => 56, 'name' => 'Fifty six'),
-    );
-    // ALTERNATIVE: $returnValues = array(); // OK, success
-    // ALTERNATIVE: $returnValues = array("Some value"); // OK, return a single value
+  $sql = "SELECT uuid FROM civicrm_managed WHERE entity_type = %1 AND entity_id = %2";
 
-    // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
-    return civicrm_api3_create_success($returnValues, $params, 'NewEntity', 'NewAction');
+  $qParams = array(
+    1 => array($params['entity_type'], 'String'),
+    2 => array($params['entity_id'], 'Integer'),
+  );
+
+  $uuid = array();
+  $dao = CRM_Core_DAO::executeQuery($sql, $qParams);
+  if ($dao->fetch()) {
+    $uuid[$dao->id] = array(
+      'uuid' => $dao->uuid,
+      'entity_type' => $dao->entity_type,
+      'entity_id' => $dao->entity_id,
+    );
+    return civicrm_api3_create_success($uuid, $params, 'Uuid', 'get', $dao);
   } else {
-    throw new API_Exception(/*errorMessage*/ 'Everyone knows that the magicword is "sesame"', /*errorCode*/ 1234);
+    throw new API_Exception(/*errorMessage*/ '', /*errorCode*/ 1234);
   }
 }
-
