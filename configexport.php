@@ -27,13 +27,7 @@ function configexport_civicrm_xmlMenu(&$files) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
-function configexport_civicrm_install()
-{
-  CRM_Core_DAO::executeQuery("
-    ALTER TABLE civicrm_managed
-     ADD COLUMN uuid varchar(64);
-    ");
-
+function configexport_civicrm_install() {
   _configexport_civix_civicrm_install();
 }
 
@@ -51,18 +45,22 @@ function configexport_civicrm_uninstall() {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
+/*
 function configexport_civicrm_enable() {
   _configexport_civix_civicrm_enable();
 }
+*/
 
 /**
  * Implements hook_civicrm_disable().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
  */
+/*
 function configexport_civicrm_disable() {
   _configexport_civix_civicrm_disable();
 }
+*/
 
 /**
  * Implements hook_civicrm_upgrade().
@@ -76,9 +74,11 @@ function configexport_civicrm_disable() {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
+/*
 function configexport_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
   return _configexport_civix_civicrm_upgrade($op, $queue);
 }
+*/
 
 /**
  * Implements hook_civicrm_managed().
