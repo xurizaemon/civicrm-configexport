@@ -128,13 +128,22 @@ function configexport_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _configexport_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
 
+function _configexport_get_directory() {
+  return CRM_Utils_File::baseFilePath() . 'ConfigAndLog/configmgr' . DIRECTORY_SEPARATOR;
+}
+
 /**
-* Implements hook_civicrm_xmlMenu().
-*
-* @param $items array()
-*
-* @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
-*/
+ * Implements (proposed) hook_civicrm_drush_commands().
+ *
+ * Exploring an idea: What if CiviCRM Extensions could define their own
+ * (per-site) Drush commands, and expose them? Issues with this because when
+ * Drush is initialising, CiviCRM isn't yet booted - so we need to identify
+ * whether CiviCRM *can* be bootstrapped, then add in per-extension commands.
+ *
+ * @param $items array()
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
+ */
 function configexport_civicrm_drush_commands(&$items) {
  $items['civicrm-config-export'] = array(
    // explicit callback declaration and non-standard name to avoid collision with "sql-conf"
@@ -144,13 +153,10 @@ function configexport_civicrm_drush_commands(&$items) {
 }
 
 /**
- * Implementation of command 'civicrm-sql-conf'
+ * Implementation of command 'civicrm-config-export'.
+ *
+ * @TODO Remove this - it's not used; just an idea.
  */
 function configexport_civicrm_config_export() {
-  $conf = drush_sql_conf();
-  // Before drush 6 drush_sql_conf already does drush_print_r, so it shouldn't
-  // be called again.
-  if (version_compare(DRUSH_VERSION, 6, '>=')) {
-    drush_print_r($conf);
-  }
+  print "Config exported here.";
 }
