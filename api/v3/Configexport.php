@@ -103,28 +103,25 @@ function civicrm_api3_configexport_export(array $params) {
   $api_params = array(
     'id' => $params['entity_id'],
   );
-  $uuid_params = array_merge(
-    $params,
-    array('return' => 'uuid')
-  );
-  if (!$uuid = civicrm_api3('uuid', 'getvalue', $uuid_params)) {
-    throw new API_Exception('Unable to obtain UUID for ' . print_r($params, 1), 2900);
+  $uuid_params = $params;
+  if (!$uuid = civicrm_api3('uuid', 'get', $uuid_params)) {
+    throw new API_Exception(ts('Unable to obtain UUID for %1', array('1' => print_r($params, 1))), 2900);
   }
+  print_r($uuid);
   if (!$api = civicrm_api3($params['entity_type'], 'getsingle', $api_params)) {
     throw new API_Exception(ts('Unable to obtain %1 with ID %2', array(1 => $params['entity_type'], 2 => $params['entity_id'])));
   }
   // Prepend UUID.
-  $api = array_merge(array('uuid' => $uuid), $api);
-  unset($api['id']);
+  $export = array_merge(array('uuid' => $uuid), $api);
+  unset($export['id']);
   $return_values = array(
     'uuid' => $uuid,
     'entity_type' => $params['entity_type'],
     'entity_id' => $params['entity_id'],
-    'yaml' => Spyc::YAMLDump($api),
+    'yaml' => Spyc::YAMLDump($export),
   );
   $export_dir = _configexport_get_directory() . strtolower($params['entity_type']);
   $export_file = $export_dir . DIRECTORY_SEPARATOR . $uuid . '.yml';
-  print $export_file;
   if (!is_dir($export_dir)) {
     if (!mkdir($export_dir, 0777, TRUE)) {
       throw new API_Exception(ts('Unable to write export to %1.', array(1 => $export_file)), 2902);
@@ -165,33 +162,5 @@ function _civicrm_api3_configexport_import_spec(array &$spec) {
  */
 function civicrm_api3_configexport_import(array $params) {
   // Hmm ... so it might be easier if we had a BAO here?
-  $api_params = array(
-    'uuid' => $params['entity_id'],
-  );
-  $uuid_params = array_merge(
-    $params,
-    array('return' => 'uuid')
-  );
-  if (!$api = civicrm_api3($params['entity_type'], 'getsingle', $api_params)) {
-    throw new API_Exception(ts('Unable to obtain %1 with ID %2', array(1 => $params['entity_type'], 2 => $params['entity_id'])));
-  }
-  if (!$uuid = civicrm_api3('uuid', 'getvalue', $uuid_params)) {
-    throw new API_Exception('Unable to obtain UUID for ' . print_r($params, 1), 2900);
-  }
-  // Prepend UUID.
-  $api = array_merge(array('uuid' => $uuid), $api);
-  unset($api['id']);
-  $return_values = array(
-    'entity_type' => $params['entity_type'],
-    'entity_id' => $params['entity_id'],
-    'uuid' => $uuid,
-    'yaml' => Spyc::YAMLDump($api),
-  );
-  $export_dir = _configexport_get_directory() . strtolower($params['entity_type']);
-  $export_file = $export_dir . DIRECTORY_SEPARATOR . $uuid . '.yml';
-  print $export_file;
-  if (!file_put_contents($export_file, $return_values['yaml'])) {
-    throw new API_Exception(ts('Unable to write export to %1.', array(1 => $export_file)));
-  }
-  return civicrm_api3_create_success($return_values, $params, 'Configexport', 'Export');
+
 }
