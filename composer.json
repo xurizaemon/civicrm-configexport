@@ -4,6 +4,7 @@
     "type": "civicrm-extension",
     "license": "GPL-2.0+",
     "require": {
-        "ramsey/uuid": "~2.8"
+        "ramsey/uuid": "~2.8",
+        "mustangostang/spyc": "^0.5.1"
     }
 }
