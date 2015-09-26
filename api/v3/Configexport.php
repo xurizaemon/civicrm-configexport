@@ -107,10 +107,11 @@ function civicrm_api3_configexport_export(array $params) {
   if (!$uuid = civicrm_api3('uuid', 'get', $uuid_params)) {
     throw new API_Exception(ts('Unable to obtain UUID for %1', array('1' => print_r($params, 1))), 2900);
   }
-  print_r($uuid);
   if (!$api = civicrm_api3($params['entity_type'], 'getsingle', $api_params)) {
     throw new API_Exception(ts('Unable to obtain %1 with ID %2', array(1 => $params['entity_type'], 2 => $params['entity_id'])));
   }
+  $uuid = $uuid['values']['uuid'];
+
   // Prepend UUID.
   $export = array_merge(array('uuid' => $uuid), $api);
   unset($export['id']);
