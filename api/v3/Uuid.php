@@ -41,7 +41,6 @@ function _civicrm_api3_uuid_create_spec(array &$spec) {
  *   It's an API_Exception.
  */
 function civicrm_api3_uuid_create(array $params) {
-  print __FUNCTION__.'@'.__LINE__."\n";
   $entry = array(
     'module' => 'civicrm_configexport',
     'entity_type' => $params['entity_type'],
@@ -57,8 +56,8 @@ function civicrm_api3_uuid_create(array $params) {
     throw new API_Exception('Unable to obtain UUID', 2900);
   }
 
-  $result = array_merge($params, array('uuid' => $dao->uuid));
-
+  $result = array_merge($params, array('uuid' => $entry['uuid']));
+  
   return civicrm_api3_create_success($result, $params, 'Uuid', 'get', $dao);
 }
 
@@ -99,18 +98,14 @@ function civicrm_api3_uuid_get(array $params) {
   }
 
   if (!$uuid = _civicrm_api3_uuid_find_by_entity_ref($params['entity_type'], $params['entity_id'])) {
-    print __FUNCTION__.'@'.__LINE__."\n";
     $api = civicrm_api3('Uuid', 'create', $params);
-    print __FUNCTION__.'@'.__LINE__."\n";
-    print_r(array('api' => $api, 'uuid' => $uuid, 'params' => $params));
+    $uuid = $api['values']['uuid'];
   }
   $result = array(
     'uuid' => $uuid,
     'entity_type' => $params['entity_type'],
     'entity_id' => $params['entity_id'],
   );
-  print __FUNCTION__.'@'.__LINE__."\n";
-  print_r($result);
   return civicrm_api3_create_success($result, $params, 'Uuid', 'get', $dao);
 }
 
