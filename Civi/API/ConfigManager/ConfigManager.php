@@ -41,7 +41,6 @@ class ConfigManager {
    * @return string
    */
   function getYamlPath(array $params) {
-    print_r($params);
     if (!isset($params['entity_type'])) {
       throw new \API_Exception(ts('Entity type is required.'));
     }

@@ -57,7 +57,7 @@ function civicrm_api3_uuid_create(array $params) {
   }
 
   $result = array_merge($params, array('uuid' => $entry['uuid']));
-  
+
   return civicrm_api3_create_success($result, $params, 'Uuid', 'get', $dao);
 }
 
@@ -110,6 +110,47 @@ function civicrm_api3_uuid_get(array $params) {
 }
 
 /**
+ * Uuid.Get API specification (optional).
+ *
+ * This is used for documentation and validation.
+ *
+ * @param array $spec
+ *   Description of fields supported by this API call.
+ *
+ * @see http://wiki.civicrm.org/confluence/display/CRM/API+Architecture+Standards
+ */
+function _civicrm_api3_uuid_entityid_spec(array &$spec) {
+  $spec['entity_type']['api.required'] = 1;
+  $spec['uuid']['api.required'] = 1;
+}
+
+/**
+ * Uuid.Get API - retrieve a UUID for a given entity.
+ *
+ * @param array $params
+ *   API parameters.
+ *
+ * @return array
+ *   API result descriptor
+ *
+ * @see civicrm_api3_create_success
+ * @see civicrm_api3_create_error
+ *
+ * @throws API_Exception
+ *   It's an API Exception.
+ */
+function civicrm_api3_uuid_entityid(array $params) {
+  if ($entity_id = _civicrm_api3_entity_id_find_by_uuid($params['entity_type'], $params['uuid'])) {
+    $result = array(
+      'uuid' => $params['uuid'],
+      'entity_type' => $params['entity_type'],
+      'entity_id' => $entity_id,
+    );
+    return civicrm_api3_create_success($result, $params, 'Uuid', 'get', $dao);
+  }
+}
+
+/**
  * Check for a UUID by entity type and ID.
  */
 function _civicrm_api3_uuid_find_by_entity_ref($entity_type, $entity_id) {
@@ -122,5 +163,21 @@ function _civicrm_api3_uuid_find_by_entity_ref($entity_type, $entity_id) {
   $dao = CRM_Core_DAO::executeQuery($query);
   if ($dao->fetch()) {
     return $dao->uuid;
+  }
+}
+
+/**
+ * Check for a UUID by entity type and ID.
+ */
+function _civicrm_api3_entity_id_find_by_uuid($entity_type, $uuid) {
+  $query = CRM_Utils_SQL_Select::from('civicrm_managed m')
+    ->select(array('m.id', 'm.uuid', 'm.entity_type', 'm.entity_id'))
+    ->where('m.uuid = @uuid', array('@uuid' => $uuid))
+    ->where('m.entity_type = @entity_type', array('@entity_type' => $entity_type))
+    ->where('m.module = @module', array('@module' => 'civicrm_configexport'))
+    ->toSQL();
+  $dao = CRM_Core_DAO::executeQuery($query);
+  if ($dao->fetch()) {
+    return $dao->entity_id;
   }
 }
