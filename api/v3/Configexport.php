@@ -9,6 +9,8 @@
 
 require 'vendor/autoload.php';
 
+use Civi\API\ConfigManager\ConfigManager;
+
 /**
  * Configexport.create API specification (optional).
  *
@@ -121,10 +123,11 @@ function civicrm_api3_configexport_export(array $params) {
     'entity_id' => $params['entity_id'],
     'yaml' => Spyc::YAMLDump($export),
   );
-  $export_dir = _configexport_get_directory() . strtolower($params['entity_type']);
-  $export_file = $export_dir . DIRECTORY_SEPARATOR . $uuid . '.yml';
-  if (!is_dir($export_dir)) {
-    if (!mkdir($export_dir, 0777, TRUE)) {
+
+  $export_file = ConfigManager::getYamlPath(array('entity_type' => $params['entity_type'], 'uuid' => $uuid));
+
+  if (!is_dir(dirname($export_file))) {
+    if (!mkdir(dirname($export_file), 0777, TRUE)) {
       throw new API_Exception(ts('Unable to write export to %1.', array(1 => $export_file)), 2902);
     }
   }
@@ -162,6 +165,5 @@ function _civicrm_api3_configexport_import_spec(array &$spec) {
  *   Throws an API exception.
  */
 function civicrm_api3_configexport_import(array $params) {
-  // Hmm ... so it might be easier if we had a BAO here?
 
 }
