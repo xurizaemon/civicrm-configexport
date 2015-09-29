@@ -102,29 +102,16 @@ function _civicrm_api3_configexport_export_spec(array &$spec) {
  *   Throws an API exception.
  */
 function civicrm_api3_configexport_export(array $params) {
-  $api_params = array(
-    'id' => $params['entity_id'],
-  );
-  $uuid_params = $params;
-  if (!$uuid = civicrm_api3('uuid', 'get', $uuid_params)) {
-    throw new API_Exception(ts('Unable to obtain UUID for %1', array('1' => print_r($params, 1))), 2900);
-  }
-  if (!$api = civicrm_api3($params['entity_type'], 'getsingle', $api_params)) {
-    throw new API_Exception(ts('Unable to obtain %1 with ID %2', array(1 => $params['entity_type'], 2 => $params['entity_id'])));
-  }
-  $uuid = $uuid['values']['uuid'];
+  $export = ConfigManager::getExportableData($params);
 
-  // Prepend UUID.
-  $export = array_merge(array('uuid' => $uuid), $api);
-  unset($export['id']);
   $return_values = array(
-    'uuid' => $uuid,
+    'uuid' => $export['uuid'],
     'entity_type' => $params['entity_type'],
     'entity_id' => $params['entity_id'],
     'yaml' => Spyc::YAMLDump($export),
   );
 
-  $export_file = ConfigManager::getYamlPath(array('entity_type' => $params['entity_type'], 'uuid' => $uuid));
+  $export_file = ConfigManager::getYamlPath(array('entity_type' => $params['entity_type'], 'uuid' => $export['uuid']));
 
   if (!is_dir(dirname($export_file))) {
     if (!mkdir(dirname($export_file), 0777, TRUE)) {
