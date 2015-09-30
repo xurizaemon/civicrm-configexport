@@ -60,14 +60,20 @@ class ConfigManager {
     // If there are entities this entity depends on, add them to the UUID.
     if ($dependencies = ConfigManager::getDependencyTypes($params['entity_type'])) {
       foreach ($dependencies as $dep_column) {
+        // payment_processor will be unaffected by this, which is OK it turns out ... for now.
         $dep_type = preg_replace('/_id$/', '', $dep_column);
         if (!empty($api[$dep_column])) {
-          $dep_params = array(
-            'entity_type' => $dep_type,
-            'entity_id' => $api[$dep_column],
-          );
-          if ($dep = ConfigManager::getExportableData($dep_params)) {
-            $export['configmgr_dependencies'][$dep_type][] = $dep;
+          // Explode it then iterate.
+          if ($entity_ids = explode(\CRM_Core_DAO::VALUE_SEPARATOR, $api[$dep_column])) {
+            foreach ($entity_ids as $entity_id) {
+              $dep_params = array(
+                'entity_type' => $dep_type,
+                'entity_id' => $api[$dep_column],
+              );
+              if ($dep = ConfigManager::exportData($dep_params)) {
+                $export['configmgr_dependencies'][$dep_type][] = $dep;
+              }
+            }
           }
         }
       }
@@ -146,7 +152,7 @@ class ConfigManager {
     switch ($entityType) {
       case 'contribution_page':
         return array(
-          // 'payment_processor', // VARCHAR(128) of ^A-separated payment_processor_id's
+          'payment_processor', // VARCHAR(128) of ^A-separated payment_processor_id's
           'financial_type_id', // FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type`
           'campaign_id', // FOREIGN KEY (`campaign_id`) REFERENCES `civicrm_campaign`
           'created_id', // FOREIGN KEY (`created_id`) REFERENCES `civicrm_contact` (`id`)
