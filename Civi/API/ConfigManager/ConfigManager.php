@@ -154,7 +154,7 @@ class ConfigManager {
         return array(
           'payment_processor_type',
         );
-        
+
       case 'contribution_page':
         return array(
           'payment_processor', // VARCHAR(128) of ^A-separated payment_processor_id's

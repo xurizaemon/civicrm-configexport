@@ -8,6 +8,8 @@ This extension is in development.
 
 * Rename as "ConfigManagement" or something, because (duh!) Import is not Export, and we came here to Import too.
 * Rename as "EntityManagement" or something, because (duh!) not everything is Config, and I realised we can export content like Contacts too. (Although the `civicrm_managed` table is gonna get *pretty weird* doing that.)
+* Identify issues where entities must be unique in characteristics other than ID (eg, "Payment processor name must be unique").
+* Identify issues where dumping / loading entities triggers mismatches (financial_type_id needs to be rewritten in import to connect to correct financial type).
 
 ## API additions
 
