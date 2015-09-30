@@ -33,14 +33,14 @@ class ConfigManager {
   }
 
   /**
-   * Get an exportable data structure from an entity.
+   * Export a data structure from an entity.
    *
    * @param array $params
    *   Parameters (entity_type, uuid).
    *
    * @return array
    */
-  function getExportableData(array $params) {
+  function exportData(array $params) {
     $api_params = array(
       'id' => $params['entity_id'],
     );
@@ -74,6 +74,36 @@ class ConfigManager {
     }
 
     return $export;
+  }
+
+  /**
+   * Import a data structure to an entity.
+   *
+   * @param array $params
+   *   Parameters (entity_type, uuid).
+   *
+   * @param array $entity
+   *   Entity to be imported.
+   *
+   * @return array
+   */
+  function importData(array $params, array $entity) {
+    if (!empty($entity['configmgr_dependencies'])) {
+      foreach ($entity['configmgr_dependencies'] as $type => $dependencies) {
+        foreach ($dependencies as $dependency) {
+          ConfigManager::importData(array('entity_type' => $type, 'uuid' => $dependency['uuid']), $dependency);
+        }
+      }
+    }
+    if ($entity_id = civicrm_api3('uuid', 'entityid', $params)) {
+      if ($api = civicrm_api3($params['entity_type'], 'get', array('id' => $entity_id['values']['entity_id']))) {
+        if ($id = reset(array_keys($api['values']))) {
+          // Update the entity.
+          $entity['id'] = $id;
+        }
+      }
+    }
+    return civicrm_api3($params['entity_type'], 'create', $entity);
   }
 
   /**

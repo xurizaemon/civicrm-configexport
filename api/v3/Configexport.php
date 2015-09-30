@@ -102,7 +102,7 @@ function _civicrm_api3_configexport_export_spec(array &$spec) {
  *   Throws an API exception.
  */
 function civicrm_api3_configexport_export(array $params) {
-  $export = ConfigManager::getExportableData($params);
+  $export = ConfigManager::exportData($params);
 
   $return_values = array(
     'uuid' => $export['uuid'],
@@ -157,13 +157,5 @@ function civicrm_api3_configexport_import(array $params) {
     throw new API_Exception(ts('Unable to find exported entity: %1::%2', array(1 => $params['entity_type'], 2 => $params['uuid'])));
   }
   $entity = Spyc::YAMLLoad($import_file);
-  if ($entity_id = civicrm_api3('uuid', 'entityid', $params)) {
-    if ($api = civicrm_api3($params['entity_type'], 'get', array('id' => $entity_id['values']['entity_id']))) {
-      if ($id = reset(array_keys($api['values']))) {
-        // Update the entity.
-        $entity['id'] = $id;
-      }
-    }
-  }
-  return civicrm_api3($params['entity_type'], 'create', $entity);
+  return ConfigManager::importData($params, $entity);
 }
