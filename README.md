@@ -2,7 +2,7 @@
 
 ## Status
 
-This extension is in development.
+Please see https://github.com/fuzionnz/civicrm-configexport for updates
 
 ## TODO
 
